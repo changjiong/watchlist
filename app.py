@@ -26,69 +26,19 @@ class Movie(db.Model):
     title = db.Column(db.String(60))
     year = db.Column(db.String(4))
 
+@app.context_processor
+def inject_user():
+    user = User.query.first()
+    return dict(user=user)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 @app.route('/')
 def index():
-    user = User.query.first()
     movies = Movie.query.all()
-
-    return  render_template('index.html',  user=user, movies=movies)
-
-@app.route('/index')
-@app.route('/home')
-def hello_world():
-    return '<h1>Hello Totoro!</h1><img src="http://helloflask.com/totoro.gif">'
-
-@app.route('/user/<name>')
-def user_page(name):
-    return  'user page: %s' % name
-
-@app.route('/test')
-def test_url_for():
-    print(url_for('hello_world'))
-    print(url_for('user_page', name='greyli'))
-    print(url_for('user_page', name='petterhome'))
-    print(url_for('test_url_for'))
-    print(url_for('test_url_for', num=2))
-    return  'Test Page'
-
-import  click
-
-@app.cli.command()
-@click.option('--drop', is_flag=True, help='Create after drop.')
-def initdb(drop):
-    """ Initialize the database."""
-    if drop:
-        db.drop_all()
-    db.create_all()
-    click.echo('Initialized database.')
-
-@app.cli.command()
-def forge():
-    """Generate fake data."""
-    db.create_all()
-
-    name = 'Grey Li'
-    movies =  [
-    {'title': 'My Neighbor Totoro', 'year': '1987'},
-    {'title': 'Dead Poets Society', 'year': '1988'},
-    {'title': 'A Perfect World', 'year': '1992'},
-    {'title': 'Leon', 'year': '1993'},
-    {'title': 'Mahjong', 'year': '1995'},
-    {'title': 'Swallowtail Butterfly', 'year': '1995'},
-    {'title': 'King of Comedy', 'year': '1998'},
-    {'title': 'Devils on the Doorstep', 'year': '1998'},
-    {'title': 'WALL-E', 'year': '2007'},
-    {'title': 'The Pork of Music', 'year': '2011'},
-    ]
-
-    user = User(name=name)
-    db.session.add(user)
-    for m in movies:
-        movie = Movie(title=m['title'], year=m['year'])
-        db.session.add(movie)
-
-    db.session.commit()
-    click.echo('Done.')
+    return  render_template('index.html', movies=movies)
 
 if __name__ == '__main__':
     app.run()
