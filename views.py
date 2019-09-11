@@ -1,8 +1,9 @@
+import time
 from flask import render_template, url_for, request, redirect, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
 from watchlist import app, db
-from watchlist.models import User, Movie
+from watchlist.models import User, Movie, SayHello
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -12,20 +13,40 @@ def index():
             return redirect(url_for('index'))
 
         title = request.form['title']
-        year = request.form['year']
+        rate = request.form['rate']
 
-        if not title or not year or len(year) > 4 or len(title) > 60:
+        if not title or not rate  or len(title) > 60:
             flash('Invalid input')
             return redirect(url_for('index'))
 
-        movie = Movie(title=title, year=year)
+        movie = Movie(title=title, rate=rate)
         db.session.add(movie)
         db.session.commit()
         flash('Item created.')
         return redirect(url_for('index'))
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    paginate = Movie.query.order_by(Movie.rate.desc()).paginate(page, per_page, error_out=False)
+    movies = paginate.items
 
-    movies = Movie.query.all()
-    return render_template('index.html', movies=movies)
+    return render_template('index.html', paginate=paginate, movies=movies)
+
+
+@app.route('/sayhello', methods=['GET', 'POST'])
+def sayhello():
+    if request.method == 'POST':
+        username = request.form['name']
+        content = request.form['body']
+        datetime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+
+        say = SayHello(username=username, content=content, datetime=datetime)
+        db.session.add(say)
+        db.session.commit()
+        flash('Your message have been sent to the world!')
+        return redirect(url_for('sayhello'))
+
+    says = SayHello.query.order_by(SayHello.id.desc()).all()
+    return render_template('sayhello.html', says=says)
 
 
 @app.route('/movie/edit/<int:movie_id>', methods=['GET', 'POST'])
@@ -35,14 +56,14 @@ def edit(movie_id):
 
     if request.method == 'POST':
         title = request.form['title']
-        year = request.form['year']
+        rate = request.form['rate']
 
-        if not title or not year or len(year) > 4 or len(title) > 60:
+        if not title or not rate  or len(title) > 60:
             flash('Invalid input.')
             return redirect(url_for('edit', movie_id=movie_id))
 
         movie.title = title
-        movie.year = year
+        movie.rate = rate
         db.session.commit()
         flash('Item updated.')
         return redirect(url_for('index'))

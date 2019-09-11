@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1 class="text-center">
+    <a href="/" class="text-success"><strong>Say Hello</strong></a>
+    <small class="text-muted sub-title">to the world</small>
+</h1>
+<div class="hello-form">
+    <form action="/sayhello" method="post" class="form" role="form">
+        <input id="csrf_token" name="csrf_token" type="hidden" value="IjJlMDEzZGE0NDJiODI5Zjk4NTQwZDcwMjAxMDg2Y2YxNmYwMzk5NmYi.EFqF4g.AqJnJTdWwlbB6OjigZkmDvp4Ey8">
+        <div class="form-group required">
+            <label class="form-control-label" for="name">Name</label>
+            <input class="form-control" id="name" name="name" required="" type="text" value="">
+        </div>
+        <div class="form-group required"><label class="form-control-label" for="body">Message</label>
+            <textarea class="form-control" id="body" name="body" required=""></textarea>
+        </div>
+        <input class="btn btn-secondary" id="submit" name="submit" type="submit" value="Submit">
+    </form>
+</div>
+<div class="list-group">
+<p>{{ says|length }} messages</p>
+    {% for say in says %}
+    <a class="list-group-item list-group-item-action flex-column">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1 text-success">{{ say.username }}
+                <small class="text-muted"> {{ say.id }} </small>
+            </h5>
+            <small data-toggle="tooltip" data-placement="top" data-timestamp="" data-delay="500" data-original-title="" title="">
+                <span class="" data-timestamp="2019-09-11T13:19:29Z" data-format="fromNow(0)" data-refresh="60000" style="">{{ say.datetime }}</span>
+            </small>
+        </div>
+        <p class="mb-1">{{ say.content }}</p>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

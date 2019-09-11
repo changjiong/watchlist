@@ -20,4 +20,12 @@ class User(db.Model, UserMixin):
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60))
-    year = db.Column(db.String(4))
+    rate = db.Column(db.String(4))
+    url = db.Column(db.String(64))
+
+
+class SayHello(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(128))
+    datetime = db.Column(db.String(24))
+    content = db.Column(db.Text)

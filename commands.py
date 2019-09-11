@@ -1,4 +1,5 @@
 import click
+import requests
 
 from watchlist import app, db
 from watchlist.models import User, Movie
@@ -20,23 +21,17 @@ def forge():
     db.create_all()
 
     name = 'Grey Li'
-    movies = [
-        {'title': 'My Neighbor Totoro', 'year': '1987'},
-        {'title': 'Dead Poets Society', 'year': '1988'},
-        {'title': 'A Perfect World', 'year': '1992'},
-        {'title': 'Leon', 'year': '1993'},
-        {'title': 'Mahjong', 'year': '1995'},
-        {'title': 'Swallowtail Butterfly', 'year': '1995'},
-        {'title': 'King of Comedy', 'year': '1998'},
-        {'title': 'Devils on the Doorstep', 'year': '1998'},
-        {'title': 'WALL-E', 'year': '2007'},
-        {'title': 'The Pork of Music', 'year': '2011'},
-    ]
+    url = 'https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&sort=recommend&page_limit=100&page_start=0'
+    json = requests.get(url).json()
+    def remain(item):
+        remain = {'rate', 'title', 'url'}
+        return {k: v for k, v in item.items() if k in remain}
+    movies = list(map(remain, json['subjects']))
 
     user = User(name=name)
     db.session.add(user)
     for m in movies:
-        movie = Movie(title=m['title'], year=m['year'])
+        movie = Movie(title=m['title'], rate=m['rate'], url=m['url'])
         db.session.add(movie)
 
     db.session.commit()
